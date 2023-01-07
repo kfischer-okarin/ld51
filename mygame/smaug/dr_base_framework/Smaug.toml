@@ -1,0 +1,24 @@
+[package]
+name = "dr_base_framework"
+authors = ["Kevin Fischer <kfischer_okarin@yahoo.co.jp>"]
+version = "2022.12.13"
+homepage = "https://github.com/kfischer-okarin/dr_base_framework"
+keywords = []
+
+# Optional:
+# documentation = "https://example.com"
+# repository = "http://github.com/example/example"
+
+# Which files do you want to be automatically required from your package.
+requires = [
+  "lib/dr_base_framework/animations.rb",
+  "lib/dr_base_framework/animations/asesprite_json.rb",
+  "lib/dr_base_framework/animated_sprite.rb"
+]
+
+
+[package.installs]
+
+[dragonruby]
+version = "3"
+edition = "standard"

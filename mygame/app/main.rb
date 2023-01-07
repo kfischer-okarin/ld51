@@ -1,3 +1,5 @@
+require 'smaug.rb'
+
 def tick(args)
   render(args.outputs, args.state)
 end
