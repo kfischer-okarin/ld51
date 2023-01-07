@@ -7,6 +7,19 @@ end
 
 def setup(args)
   args.state.villagers = [Villager.build(x: 20, y: 20)]
+  args.state.icons = animation_frames('sprites/icons.json')
+  args.state.menu = [
+    { rect: { x: 5, y: 5, w: 15, h: 15 }, icon: :house },
+    { rect: { x: 25, y: 5, w: 15, h: 15 }, icon: :wheat }
+  ]
+end
+
+def animation_frames(path)
+  Animations::AsespriteJson.read(path).transform_values { |animation|
+    {}.tap { |sprite|
+      Animations.start!(sprite, animation: animation)
+    }
+  }
 end
 
 def render(gtk_outputs, state)
@@ -21,13 +34,24 @@ def render(gtk_outputs, state)
     AnimatedSprite.perform_tick(sprite, animation: :walk)
     screen.primitives << sprite
   end
+
+  state.menu.each do |item|
+    rect = item[:rect]
+    screen.primitives << state.icons[:background].merge(PALETTE[:dark_brown]).merge(rect)
+    screen.primitives << state.icons[item[:icon]].merge(rect)
+    screen.primitives << state.icons[:border].merge(rect)
+  end
   gtk_outputs.primitives << { x: 0, y: 0, w: 1280, h: 720, path: :screen }.sprite!
 end
 
 # Dawnbringer 32 color palette
 PALETTE = {
+  black: { r: 0x00, g: 0x00, b: 0x00 },
+  dark_grey: { r: 0x22, g: 0x20, b: 0x34 },
+  dark_brown: { r: 0x45, g: 0x28, b: 0x3c },
   bright_green: { r: 0x99, g: 0xe5, b: 0x50 },
-  green: { r: 0x6a, g: 0xbe, b: 0x30 }
+  green: { r: 0x6a, g: 0xbe, b: 0x30 },
+  blue_grey: { r: 0xcb, g: 0xdb, b: 0xfc }
 }
 
 PALETTE.each_value do |color|
@@ -46,6 +70,9 @@ module Villager
       }
     end
   end
+end
+
+module Menu
 end
 
 $gtk.reset
