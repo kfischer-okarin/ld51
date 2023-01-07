@@ -9,19 +9,6 @@ def setup(args)
   args.state.villagers = [Villager.build(x: 20, y: 20)]
 end
 
-module Villager
-  class << self
-    def build(x:, y:)
-      @animations ||= Animations::AsespriteJson.read('sprites/villager.json')
-      {
-        x: x,
-        y: y,
-        sprite: AnimatedSprite.build(animations: @animations)
-      }
-    end
-  end
-end
-
 def render(gtk_outputs, state)
   gtk_outputs.background_color = PALETTE[:green].to_a
   screen = gtk_outputs[:screen]
@@ -46,6 +33,19 @@ PALETTE = {
 PALETTE.each_value do |color|
   color.define_singleton_method(:to_a) { [r, g, b] }
   color.freeze
+end
+
+module Villager
+  class << self
+    def build(x:, y:)
+      @animations ||= Animations::AsespriteJson.read('sprites/villager.json')
+      {
+        x: x,
+        y: y,
+        sprite: AnimatedSprite.build(animations: @animations)
+      }
+    end
+  end
 end
 
 $gtk.reset
