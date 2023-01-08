@@ -9,6 +9,7 @@ end
 def setup(args)
   state = args.state
   state.villagers = [Villager.build(x: 20, y: 20)]
+  state.money = 100
   state.icons = animation_frames('sprites/icons.json')
   state.menu.items = [
     { rect: { x: 5, y: 164, w: 15, h: 15 }, icon: :house },
@@ -70,6 +71,12 @@ def render_ui(gtk_outputs, state)
     gtk_outputs.primitives << state.icons[item[:icon]].merge(rect)
     gtk_outputs.primitives << state.icons[:border].merge(rect) if menu.hovered_item == item
   end
+
+  gtk_outputs.primitives << state.icons[:coin].merge(x: 278, y: 164)
+  gtk_outputs.primitives << {
+    x: 317, y: 172, text: state.money.to_s, font: 'fonts/kenney_pixel.ttf',
+    size_enum: -5, alignment_enum: 2, vertical_alignment_enum: 1
+  }.label!(PALETTE[:yellow])
 end
 
 # Dawnbringer 32 color palette
@@ -78,6 +85,7 @@ PALETTE = {
   dark_grey: { r: 0x22, g: 0x20, b: 0x34 },
   dark_brown: { r: 0x45, g: 0x28, b: 0x3c },
   brown: { r: 0x66, g: 0x39, b: 0x31 },
+  yellow: { r: 0xfb, g: 0xf2, b: 0x36 },
   bright_green: { r: 0x99, g: 0xe5, b: 0x50 },
   green: { r: 0x6a, g: 0xbe, b: 0x30 },
   blue_grey: { r: 0xcb, g: 0xdb, b: 0xfc }
