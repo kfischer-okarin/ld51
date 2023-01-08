@@ -37,7 +37,11 @@ def process_inputs(inputs, state)
 end
 
 def handle_menu(mouse, menu)
-  menu.hovered_item = menu.items.find { |item| mouse.inside_rect?(item[:rect]) }
+  menu.hovered_item = nil
+  menu.items.each do |item|
+    Button.handle_mouse_input(mouse, item)
+    menu.hovered_item = item if item[:hovered]
+  end
 end
 
 def render(gtk_outputs, state)
@@ -109,7 +113,15 @@ module Villager
   end
 end
 
-module Menu
+# TODO: Move to base framework
+module Button
+  class << self
+    def handle_mouse_input(mouse, button)
+      button[:hovered] = mouse.inside_rect?(button[:rect])
+      button[:hovered_ticks] =  button[:hovered] ? (button[:hovered_ticks] || 0) + 1 : 0
+      button[:clicked] = button[:hovered] && mouse.click
+    end
+  end
 end
 
 $gtk.reset
