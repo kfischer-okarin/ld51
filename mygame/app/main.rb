@@ -2,16 +2,19 @@ require 'smaug.rb'
 
 def tick(args)
   setup(args) if args.tick_count.zero?
+  process_inputs(args.inputs, args.state)
   render(args.outputs, args.state)
 end
 
 def setup(args)
-  args.state.villagers = [Villager.build(x: 20, y: 20)]
-  args.state.icons = animation_frames('sprites/icons.json')
-  args.state.menu = [
-    { rect: { x: 5, y: 5, w: 15, h: 15 }, icon: :house },
-    { rect: { x: 25, y: 5, w: 15, h: 15 }, icon: :wheat }
+  state = args.state
+  state.villagers = [Villager.build(x: 20, y: 20)]
+  state.icons = animation_frames('sprites/icons.json')
+  state.menu.items = [
+    { rect: { x: 5, y: 164, w: 15, h: 15 }, icon: :house },
+    { rect: { x: 25, y: 164, w: 15, h: 15 }, icon: :wheat }
   ]
+  state.menu.hovered_item = nil
 end
 
 def animation_frames(path)
@@ -20,6 +23,20 @@ def animation_frames(path)
       Animations.start!(sprite, animation: animation)
     }
   }
+end
+
+def process_inputs(inputs, state)
+  mouse = {
+    x: inputs.mouse.x.idiv(4),
+    y: inputs.mouse.y.idiv(4),
+    w: 0,
+    h: 0
+  }
+  handle_menu(mouse, state.menu)
+end
+
+def handle_menu(mouse, menu)
+  menu.hovered_item = menu.items.find { |item| mouse.inside_rect?(item[:rect]) }
 end
 
 def render(gtk_outputs, state)
@@ -35,13 +52,24 @@ def render(gtk_outputs, state)
     screen.primitives << sprite
   end
 
-  state.menu.each do |item|
-    rect = item[:rect]
-    screen.primitives << state.icons[:background].merge(PALETTE[:dark_brown]).merge(rect)
-    screen.primitives << state.icons[item[:icon]].merge(rect)
-    screen.primitives << state.icons[:border].merge(rect)
-  end
+  render_ui(screen, state)
+
   gtk_outputs.primitives << { x: 0, y: 0, w: 1280, h: 720, path: :screen }.sprite!
+end
+
+def render_ui(gtk_outputs, state)
+  gtk_outputs.primitives << {
+    x: 0, y: 163, w: 320, h: 17,
+    path: :pixel
+  }.sprite!(PALETTE[:dark_grey])
+
+  menu = state.menu
+  menu.items.each do |item|
+    rect = item[:rect]
+    gtk_outputs.primitives << state.icons[:background].merge(PALETTE[:dark_brown]).merge(rect)
+    gtk_outputs.primitives << state.icons[item[:icon]].merge(rect)
+    gtk_outputs.primitives << state.icons[:border].merge(rect) if menu.hovered_item == item
+  end
 end
 
 # Dawnbringer 32 color palette
@@ -49,6 +77,7 @@ PALETTE = {
   black: { r: 0x00, g: 0x00, b: 0x00 },
   dark_grey: { r: 0x22, g: 0x20, b: 0x34 },
   dark_brown: { r: 0x45, g: 0x28, b: 0x3c },
+  brown: { r: 0x66, g: 0x39, b: 0x31 },
   bright_green: { r: 0x99, g: 0xe5, b: 0x50 },
   green: { r: 0x6a, g: 0xbe, b: 0x30 },
   blue_grey: { r: 0xcb, g: 0xdb, b: 0xfc }
