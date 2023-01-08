@@ -18,14 +18,6 @@ def setup(args)
   state.menu.hovered_item = nil
 end
 
-def animation_frames(path)
-  Animations::AsespriteJson.read(path).transform_values { |animation|
-    {}.tap { |sprite|
-      Animations.start!(sprite, animation: animation)
-    }
-  }
-end
-
 def process_inputs(inputs, state)
   mouse = {
     x: inputs.mouse.x.idiv(4),
@@ -122,6 +114,17 @@ module Button
       button[:clicked] = button[:hovered] && mouse.click
     end
   end
+end
+
+# TODO: Find a good way to integrate this into the framework
+# Maybe instead of Animations::AsespriteJson - FileFormats::AsespriteJson.read_animations and read_sprites
+
+def animation_frames(path)
+  Animations::AsespriteJson.read(path).transform_values { |animation|
+    {}.tap { |sprite|
+      Animations.start!(sprite, animation: animation)
+    }
+  }
 end
 
 $gtk.reset
