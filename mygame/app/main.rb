@@ -114,11 +114,13 @@ module Button
     def handle_mouse_input(mouse, button)
       button[:hovered_ticks] ||= 0
       button[:pressed_ticks] ||= 0
+      button[:ticks_since_released] ||= 0
       button[:hovered] = mouse.inside_rect?(button)
       button[:hovered_ticks] = button[:hovered] ? button[:hovered_ticks] + 1 : 0
       button[:clicked] = button[:hovered] && mouse.click
       button[:pressed] = button[:hovered] && mouse.button_left
       button[:released] = button[:pressed_ticks].positive? && !mouse.button_left
+      button[:ticks_since_released] = button[:released] ? 0 : button[:ticks_since_released] + 1
       button[:pressed_ticks] = button[:pressed] ? button[:pressed_ticks] + 1 : 0
     end
   end
