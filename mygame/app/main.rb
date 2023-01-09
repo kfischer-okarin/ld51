@@ -20,7 +20,10 @@ def setup(args)
       x: 5, y: 164, w: 15, h: 15, icon: :house,
       building: { type: :house, cost: 30, collider: { x: 4, y: 0, w: 16, h: 9 } }
     },
-    { x: 25, y: 164, w: 15, h: 15, icon: :wheat }
+    {
+      x: 25, y: 164, w: 15, h: 15, icon: :wheat,
+      building: { type: :field, cost: 10 }
+    }
   ]
   state.mode = { type: :none }
 
@@ -83,6 +86,10 @@ def build_house(state, house)
   state.villagers << Villager.build(x: house[:x] + 12, y: house[:y] - 8)
 end
 
+def build_field(state, field)
+  state.buildings << field
+end
+
 def render(gtk_outputs, state)
   gtk_outputs.background_color = PALETTE[:green].to_a
   screen = gtk_outputs[:screen]
@@ -91,7 +98,7 @@ def render(gtk_outputs, state)
 
   state.buildings.each do |building|
     screen.primitives << building
-    next unless debug_mode?
+    next unless debug_mode? && building[:collider]
 
     screen.primitives << building[:collider].to_border(
       x: building[:x] + building[:collider][:x],
