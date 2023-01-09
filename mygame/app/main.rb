@@ -1,5 +1,8 @@
 require 'smaug.rb'
 
+require 'lib/extra_keys.rb'
+require 'lib/debug_mode.rb'
+
 def tick(args)
   setup(args) if args.tick_count.zero?
   process_inputs(args.inputs, args.state)
@@ -19,6 +22,8 @@ def setup(args)
     { x: 25, y: 164, w: 15, h: 15, icon: :wheat }
   ]
   state.mode = { type: :none }
+
+  $debug.log_color = { r: 255, g: 255, b: 255 }
 end
 
 def process_inputs(inputs, state)
