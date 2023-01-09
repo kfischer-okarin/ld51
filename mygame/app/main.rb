@@ -177,6 +177,7 @@ def build_field(state, field)
     y: field[:y],
     w: field[:w],
     h: 26,
+    type: :field,
     rand_sprite_index: rand(10),
     stage: 0,
     stage_ticks: 0,
@@ -239,11 +240,31 @@ def render_ui(gtk_outputs, state)
 end
 
 def update(state)
-  if state.tick_count.mod_zero?(5)
-    state.villagers.each do |villager|
-      villager[:movement] = { x: rand(3) - 1, y: rand(3) - 1 }
-      villager[:x] += villager[:movement][:x]
-      villager[:y] += villager[:movement][:y]
+  update_villagers(state)
+  update_fields(state)
+end
+
+def update_villagers(state)
+  return unless state.tick_count.mod_zero?(5)
+
+  state.villagers.each do |villager|
+    villager[:movement] = { x: rand(3) - 1, y: rand(3) - 1 }
+    villager[:x] += villager[:movement][:x]
+    villager[:y] += villager[:movement][:y]
+  end
+end
+
+def update_fields(state)
+  state.buildings.each do |building|
+    next unless building[:type] == :field
+
+    next if building[:stage] == 5
+
+    building[:stage_ticks] += 1
+    if building[:stage_ticks] >= 200
+      building[:stage] += 1
+      building[:stage_ticks] = 0
+      building[:path] = :"wheat_stage#{building[:stage]}_#{building[:rand_sprite_index]}"
     end
   end
 end
