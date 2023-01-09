@@ -151,8 +151,6 @@ end
 
 def handle_building(state)
   building = state.mode[:building]
-  return unless building # TODO: Remove
-
   building_sprite = Sprites.buildings[building[:type]]
   building_preview = building_sprite.merge(
     x: state.mouse[:x] - building_sprite[:w].idiv(2),
