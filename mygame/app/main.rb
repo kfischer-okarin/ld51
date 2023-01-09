@@ -10,7 +10,6 @@ def setup(args)
   state = args.state
   state.villagers = [Villager.build(x: 20, y: 20)]
   state.money = 100
-  state.icons = animation_frames('sprites/icons.json')
   state.menu.items = [
     { x: 5, y: 164, w: 15, h: 15, icon: :house, building: :house },
     { x: 25, y: 164, w: 15, h: 15, icon: :wheat, building: :field }
@@ -75,12 +74,12 @@ def render_ui(gtk_outputs, state)
   menu.items.each do |item|
     rect = item.slice(:x, :y, :w, :h)
     bg_color = item[:selected] ? PALETTE[:orange] : PALETTE[:dark_brown]
-    gtk_outputs.primitives << state.icons[:background].merge(bg_color).merge(rect)
-    gtk_outputs.primitives << state.icons[item[:icon]].merge(rect)
-    gtk_outputs.primitives << state.icons[:border].merge(rect) if item[:hovered] && !item[:selected]
+    gtk_outputs.primitives << Sprites.icons[:background].merge(bg_color).merge(rect)
+    gtk_outputs.primitives << Sprites.icons[item[:icon]].merge(rect)
+    gtk_outputs.primitives << Sprites.icons[:border].merge(rect) if item[:hovered] && !item[:selected]
   end
 
-  gtk_outputs.primitives << state.icons[:coin].merge(x: 278, y: 164)
+  gtk_outputs.primitives << Sprites.icons[:coin].merge(x: 278, y: 164)
   gtk_outputs.primitives << {
     x: 317, y: 172, text: state.money.to_s, font: 'fonts/kenney_pixel.ttf',
     size_enum: -5, alignment_enum: 2, vertical_alignment_enum: 1
@@ -115,6 +114,14 @@ module Villager
         y: y,
         sprite: AnimatedSprite.build(animations: @animations)
       }
+    end
+  end
+end
+
+module Sprites
+  class << self
+    def icons
+      @icons ||= animation_frames('sprites/icons.json')
     end
   end
 end
