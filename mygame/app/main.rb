@@ -12,7 +12,7 @@ end
 def setup(args)
   state = args.state
   state.buildings = []
-  state.villagers = [Villager.build(x: 20, y: 20)]
+  state.villagers = []
   state.money = 100
   state.menu.items = [
     {
@@ -73,8 +73,13 @@ def handle_building(state)
   state.building_preview.merge!(r: 255, g: 0, b: 0) unless buildable
   return unless state.mouse[:click] && buildable
 
-  state.buildings << building_preview.merge(building)
+  send(:"build_#{building[:type]}", state, building_preview.merge(building))
   state.money -= building[:cost]
+end
+
+def build_house(state, house)
+  state.buildings << house
+  state.villagers << Villager.build(x: house[:x] + 12, y: house[:y] - 8)
 end
 
 def render(gtk_outputs, state)
