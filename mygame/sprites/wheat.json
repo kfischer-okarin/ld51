@@ -1,0 +1,68 @@
+{ "frames": [
+   {
+    "filename": "stage1-----0",
+    "frame": { "x": 0, "y": 0, "w": 3, "h": 5 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 3, "h": 5 },
+    "sourceSize": { "w": 3, "h": 5 },
+    "duration": 100
+   },
+   {
+    "filename": "stage2-----0",
+    "frame": { "x": 3, "y": 0, "w": 3, "h": 5 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 3, "h": 5 },
+    "sourceSize": { "w": 3, "h": 5 },
+    "duration": 100
+   },
+   {
+    "filename": "stage3-----0",
+    "frame": { "x": 6, "y": 0, "w": 3, "h": 5 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 3, "h": 5 },
+    "sourceSize": { "w": 3, "h": 5 },
+    "duration": 100
+   },
+   {
+    "filename": "stage4-----0",
+    "frame": { "x": 0, "y": 5, "w": 3, "h": 5 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 3, "h": 5 },
+    "sourceSize": { "w": 3, "h": 5 },
+    "duration": 100
+   },
+   {
+    "filename": "stage5-----0",
+    "frame": { "x": 3, "y": 5, "w": 3, "h": 5 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 3, "h": 5 },
+    "sourceSize": { "w": 3, "h": 5 },
+    "duration": 100
+   }
+ ],
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.2.39-arm64",
+  "image": "wheat.png",
+  "format": "RGBA8888",
+  "size": { "w": 9, "h": 10 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "stage1", "from": 0, "to": 0, "direction": "forward" },
+   { "name": "stage2", "from": 1, "to": 1, "direction": "forward" },
+   { "name": "stage3", "from": 2, "to": 2, "direction": "forward" },
+   { "name": "stage4", "from": 3, "to": 3, "direction": "forward" },
+   { "name": "stage5", "from": 4, "to": 4, "direction": "forward" }
+  ],
+  "layers": [
+   { "name": "Layer 1", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}

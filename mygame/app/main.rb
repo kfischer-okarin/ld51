@@ -28,6 +28,90 @@ def setup(args)
   state.mode = { type: :none }
 
   $debug.log_color = { r: 255, g: 255, b: 255 }
+
+  prepare_wheat_sprites(args)
+end
+
+def prepare_wheat_sprites(args)
+  10.times do |i|
+    oar_positions = generate_oar_positions
+    (0..5).each do |stage|
+      target = args.outputs[:"wheat_stage#{stage}_#{i}"]
+      target.width = 24
+      target.height = 26
+      target.sprites << Sprites.buildings[:field].merge(x: 0, y: 0)
+      next if stage.zero?
+
+      oar_positions.each do |position|
+        target.sprites << Sprites.wheat[:"stage#{stage}"].merge(position)
+      end
+    end
+  end
+end
+
+def generate_oar_positions
+  possible_positions = {}
+  (2..21).each do |x|
+    (1..21).each do |y|
+      possible_positions[{ x: x, y: y }] = true
+    end
+  end
+
+  [].tap { |result|
+    while possible_positions.any?
+      next_position = next_oar_position(possible_positions)
+      position = next_position[:position]
+      next_position[:invalidated_positions].each do |invalidated|
+        possible_positions.delete invalidated
+      end
+
+      position[:x] -= 1
+      result << position.merge(w: 3, h: 5, flip_horizontally: rand(2) == 1)
+    end
+  }
+end
+
+def next_oar_position(possible_positions)
+  candidates = []
+
+  2.times do
+    position = possible_positions.keys.sample
+
+    invalidated_positions = []
+
+    (-1..1).each do |x|
+      invalidated_positions << { x: position[:x] + x, y: position[:y] + 5 }
+    end
+
+    (-2..2).each do |x|
+      invalidated_positions << { x: position[:x] + x, y: position[:y] + 4 }
+      invalidated_positions << { x: position[:x] + x, y: position[:y] + 3 }
+    end
+
+    (-3..3).each do |x|
+      invalidated_positions << { x: position[:x] + x, y: position[:y] + 2 }
+      invalidated_positions << { x: position[:x] + x, y: position[:y] + 1 }
+      invalidated_positions << { x: position[:x] + x, y: position[:y] + 0 }
+      invalidated_positions << { x: position[:x] + x, y: position[:y] - 1 }
+      invalidated_positions << { x: position[:x] + x, y: position[:y] - 2 }
+    end
+
+    (-2..2).each do |x|
+      invalidated_positions << { x: position[:x] + x, y: position[:y] - 3 }
+      invalidated_positions << { x: position[:x] + x, y: position[:y] - 4 }
+    end
+
+    (-1..1).each do |x|
+      invalidated_positions << { x: position[:x] + x, y: position[:y] - 5 }
+    end
+
+    invalidated_positions.select! { |pos| possible_positions.key? pos }
+    invalidated_positions.uniq!
+
+    candidates << { position: position, invalidated_positions: invalidated_positions }
+  end
+
+  candidates.min_by { |c| c[:invalidated_positions].length }
 end
 
 def process_inputs(inputs, state)
@@ -87,7 +171,17 @@ def build_house(state, house)
 end
 
 def build_field(state, field)
-  state.buildings << field
+  rand_sprite_index = rand(10)
+  state.buildings << {
+    x: field[:x],
+    y: field[:y],
+    w: field[:w],
+    h: 26,
+    rand_sprite_index: rand(10),
+    stage: 0,
+    stage_ticks: 0,
+    path: :"wheat_stage0_#{rand_sprite_index}"
+  }.sprite!
 end
 
 def render(gtk_outputs, state)
@@ -194,7 +288,17 @@ module Sprites
     end
 
     def buildings
-      @buildings ||= animation_frames('sprites/buildings.json')
+      unless @buildings
+        @buildings = animation_frames('sprites/buildings.json')
+        @buildings[:field][:h] = 24
+        @buildings[:field][:tile_h] = 24
+      end
+
+      @buildings
+    end
+
+    def wheat
+      @wheat ||= animation_frames('sprites/wheat.json')
     end
   end
 end
