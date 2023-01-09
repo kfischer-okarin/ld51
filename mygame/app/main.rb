@@ -7,6 +7,7 @@ def tick(args)
   setup(args) if args.tick_count.zero?
   process_inputs(args.inputs, args.state)
   render(args.outputs, args.state)
+  update(args.state)
 end
 
 def setup(args)
@@ -136,6 +137,16 @@ def render_ui(gtk_outputs, state)
   }.label!(PALETTE[:yellow])
 end
 
+def update(state)
+  if state.tick_count.mod_zero?(5)
+    state.villagers.each do |villager|
+      villager[:movement] = { x: rand(3) - 1, y: rand(3) - 1 }
+      villager[:x] += villager[:movement][:x]
+      villager[:y] += villager[:movement][:y]
+    end
+  end
+end
+
 # Dawnbringer 32 color palette
 PALETTE = {
   black: { r: 0x00, g: 0x00, b: 0x00 },
@@ -162,6 +173,7 @@ module Villager
       {
         x: x,
         y: y,
+        movement: { x: 0, y: 0 },
         sprite: AnimatedSprite.build(animations: @animations)
       }
     end

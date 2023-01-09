@@ -5,7 +5,7 @@
 - [x] Remove money
 - [x] No overlapping build
 - [x] No build when no money
-- [ ] Spawn villager from house
+- [x] Spawn villager from house
 - [ ] Build field
 - [ ] Field / villager 1:1 assignment
 - [ ] Villager walk to field stay there a bit... walk back... stay there a bit, repeat
