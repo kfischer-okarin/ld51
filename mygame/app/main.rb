@@ -12,18 +12,21 @@ def setup(args)
   state.money = 100
   state.icons = animation_frames('sprites/icons.json')
   state.menu.items = [
-    { rect: { x: 5, y: 164, w: 15, h: 15 }, icon: :house },
-    { rect: { x: 25, y: 164, w: 15, h: 15 }, icon: :wheat }
+    { x: 5, y: 164, w: 15, h: 15, icon: :house },
+    { x: 25, y: 164, w: 15, h: 15, icon: :wheat }
   ]
   state.menu.hovered_item = nil
 end
 
 def process_inputs(inputs, state)
+  original_mouse = inputs.mouse
   mouse = {
-    x: inputs.mouse.x.idiv(4),
-    y: inputs.mouse.y.idiv(4),
+    x: original_mouse.x.idiv(4),
+    y: original_mouse.y.idiv(4),
     w: 0,
-    h: 0
+    h: 0,
+    click: original_mouse.click,
+    button_left: original_mouse.button_left
   }
   handle_menu(mouse, state.menu)
 end
@@ -62,7 +65,7 @@ def render_ui(gtk_outputs, state)
 
   menu = state.menu
   menu.items.each do |item|
-    rect = item[:rect]
+    rect = item.slice(:x, :y, :w, :h)
     gtk_outputs.primitives << state.icons[:background].merge(PALETTE[:dark_brown]).merge(rect)
     gtk_outputs.primitives << state.icons[item[:icon]].merge(rect)
     gtk_outputs.primitives << state.icons[:border].merge(rect) if menu.hovered_item == item
@@ -109,9 +112,14 @@ end
 module Button
   class << self
     def handle_mouse_input(mouse, button)
-      button[:hovered] = mouse.inside_rect?(button[:rect])
-      button[:hovered_ticks] =  button[:hovered] ? (button[:hovered_ticks] || 0) + 1 : 0
+      button[:hovered_ticks] ||= 0
+      button[:pressed_ticks] ||= 0
+      button[:hovered] = mouse.inside_rect?(button)
+      button[:hovered_ticks] = button[:hovered] ? button[:hovered_ticks] + 1 : 0
       button[:clicked] = button[:hovered] && mouse.click
+      button[:pressed] = button[:hovered] && mouse.button_left
+      button[:released] = button[:pressed_ticks].positive? && !mouse.button_left
+      button[:pressed_ticks] = button[:pressed] ? button[:pressed_ticks] + 1 : 0
     end
   end
 end
