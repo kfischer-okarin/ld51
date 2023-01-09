@@ -12,8 +12,11 @@ def setup(args)
   state.villagers = [Villager.build(x: 20, y: 20)]
   state.money = 100
   state.menu.items = [
-    { x: 5, y: 164, w: 15, h: 15, icon: :house, building: :house, cost: 30 },
-    { x: 25, y: 164, w: 15, h: 15, icon: :wheat, building: :field }
+    {
+      x: 5, y: 164, w: 15, h: 15, icon: :house,
+      building: { type: :house, cost: 30 }
+    },
+    { x: 25, y: 164, w: 15, h: 15, icon: :wheat }
   ]
   state.mode = { type: :none }
 end
@@ -42,30 +45,31 @@ def handle_menu(state)
   end
   return unless clicked_item
 
-  state.mode = { type: :build, building: clicked_item[:building], cost: clicked_item[:cost] }
+  state.mode = { type: :build, building: clicked_item[:building] }
   menu_items.each do |item|
     item[:selected] = item == clicked_item
   end
 end
 
 def handle_building(state)
-  building = Sprites.buildings[state.mode[:building]]
+  building = state.mode[:building]
   return unless building # TODO: Remove
 
-  building_preview = building.merge(
-    x: state.mouse[:x] - building[:w].idiv(2),
-    y: state.mouse[:y] - building[:h].idiv(2)
+  building_sprite = Sprites.buildings[building[:type]]
+  building_preview = building_sprite.merge(
+    x: state.mouse[:x] - building_sprite[:w].idiv(2),
+    y: state.mouse[:y] - building_sprite[:h].idiv(2)
   )
   game_area = { x: 0, y: 0, w: 320, h: 163 }
   buildable = building_preview.inside_rect?(game_area) &&
               state.buildings.none? { |b| b.intersect_rect?(building_preview) } &&
-              state.money >= state.mode[:cost]
+              state.money >= building[:cost]
   state.building_preview = building_preview.merge(a: 200)
   state.building_preview.merge!(r: 255, g: 0, b: 0) unless buildable
   return unless state.mouse[:click] && buildable
 
   state.buildings << building_preview
-  state.money -= state.mode[:cost]
+  state.money -= building[:cost]
 end
 
 def render(gtk_outputs, state)
