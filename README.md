@@ -1,10 +1,10 @@
 # My Game
 
 ## TODO:
-- [ ] Build house
-- [ ] Remove money
-- [ ] No overlapping build
-- [ ] No build when no money
+- [x] Build house
+- [x] Remove money
+- [x] No overlapping build
+- [x] No build when no money
 - [ ] Spawn villager from house
 - [ ] Build field
 - [ ] Field / villager 1:1 assignment
