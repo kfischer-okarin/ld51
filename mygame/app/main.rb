@@ -12,15 +12,15 @@ def setup(args)
   state.money = 100
   state.icons = animation_frames('sprites/icons.json')
   state.menu.items = [
-    { x: 5, y: 164, w: 15, h: 15, icon: :house },
-    { x: 25, y: 164, w: 15, h: 15, icon: :wheat }
+    { x: 5, y: 164, w: 15, h: 15, icon: :house, building: :house },
+    { x: 25, y: 164, w: 15, h: 15, icon: :wheat, building: :field }
   ]
-  state.mode = :none
+  state.mode = { type: :none }
 end
 
 def process_inputs(inputs, state)
   original_mouse = inputs.mouse
-  mouse = {
+  state.mouse = {
     x: original_mouse.x.idiv(4),
     y: original_mouse.y.idiv(4),
     w: 0,
@@ -28,18 +28,21 @@ def process_inputs(inputs, state)
     click: original_mouse.click,
     button_left: original_mouse.button_left
   }
-  handle_menu(mouse, state.menu)
+  handle_menu(state)
 end
 
-def handle_menu(mouse, menu)
+def handle_menu(state)
+  mouse = state.mouse
+  menu_items = state.menu.items
   clicked_item = nil
-  menu.items.each do |item|
+  menu_items.each do |item|
     Button.handle_mouse_input(mouse, item)
     clicked_item = item if item[:clicked]
   end
   return unless clicked_item
 
-  menu.items.each do |item|
+  state.mode = { type: :build, building: clicked_item[:building] }
+  menu_items.each do |item|
     item[:selected] = item == clicked_item
   end
 end
