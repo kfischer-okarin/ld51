@@ -12,8 +12,11 @@ end
 
 def setup(args)
   state = args.state
-  state.buildings = []
-  state.villagers = []
+  state.next_id = 0
+  state.entities = {}
+  state.house_ids = []
+  state.field_ids = []
+  state.villager_ids = []
   state.money = 100
   state.menu.items = [
     {
@@ -158,7 +161,7 @@ def handle_building(state)
   )
   game_area = { x: 0, y: 0, w: 320, h: 163 }
   buildable = building_preview.inside_rect?(game_area) &&
-              state.buildings.none? { |b| b.intersect_rect?(building_preview) } &&
+              buildings(state).none? { |b| b.intersect_rect?(building_preview) } &&
               state.money >= building[:cost]
   state.building_preview = building_preview.merge(a: 200)
   state.building_preview.merge!(r: 255, g: 0, b: 0) unless buildable
@@ -169,12 +172,20 @@ def handle_building(state)
 end
 
 def build_house(state, house)
-  state.buildings << house
-  state.villagers << Villager.build(x: house[:x] + 12, y: house[:y] - 8)
+  house_id = generate_next_id(state)
+  state.house_ids << house_id
+  state.entities[house_id] = house.merge(id: house_id)
+
+  villager_id = generate_next_id(state)
+  state.villager_ids << villager_id
+  state.entities[villager_id] = Villager.build(id: villager_id, x: house[:x] + 12, y: house[:y] - 8)
 end
 
 def build_field(state, field)
-  state.buildings << {
+  id = generate_next_id(state)
+  state.field_ids << id
+  state.entities[id] = {
+    id: id,
     x: field[:x],
     y: field[:y],
     w: field[:w],
@@ -187,13 +198,17 @@ def build_field(state, field)
   }.sprite!
 end
 
+def generate_next_id(state)
+  state.next_id += 1
+end
+
 def render(gtk_outputs, state)
   gtk_outputs.background_color = PALETTE[:green].to_a
   screen = gtk_outputs[:screen]
   screen.width = 320
   screen.height = 180
 
-  state.buildings.each do |building|
+  buildings(state).each do |building|
     screen.primitives << building
     next unless debug_mode? && building[:collider]
 
@@ -204,7 +219,7 @@ def render(gtk_outputs, state)
     )
   end
 
-  state.villagers.each do |villager|
+  villagers(state).each do |villager|
     sprite = villager[:sprite]
     sprite[:x] = villager[:x] - 3
     sprite[:y] = villager[:y]
@@ -249,7 +264,7 @@ end
 def update_villagers(state)
   return unless state.tick_count.mod_zero?(5)
 
-  state.villagers.each do |villager|
+  villagers(state).each do |villager|
     villager[:movement] = { x: rand(3) - 1, y: rand(3) - 1 }
     villager[:x] += villager[:movement][:x]
     villager[:y] += villager[:movement][:y]
@@ -257,18 +272,32 @@ def update_villagers(state)
 end
 
 def update_fields(state)
-  state.buildings.each do |building|
-    next unless building[:type] == :field
+  fields(state).each do |field|
+    next if field[:stage] == 5
 
-    next if building[:stage] == 5
-
-    building[:stage_ticks] += 1
-    if building[:stage_ticks] >= 200
-      building[:stage] += 1
-      building[:stage_ticks] = 0
-      building[:path] = :"wheat_stage#{building[:stage]}_#{building[:rand_sprite_index]}"
+    field[:stage_ticks] += 1
+    if field[:stage_ticks] >= 200
+      field[:stage] += 1
+      field[:stage_ticks] = 0
+      field[:path] = :"wheat_stage#{field[:stage]}_#{field[:rand_sprite_index]}"
     end
   end
+end
+
+def buildings(state)
+  houses(state) + fields(state)
+end
+
+def houses(state)
+  state.house_ids.map { |id| state.entities[id] }
+end
+
+def fields(state)
+  state.field_ids.map { |id| state.entities[id] }
+end
+
+def villagers(state)
+  state.villager_ids.map { |id| state.entities[id] }
 end
 
 # Dawnbringer 32 color palette
@@ -292,9 +321,10 @@ end
 
 module Villager
   class << self
-    def build(x:, y:)
+    def build(id:, x:, y:)
       @animations ||= Animations::AsespriteJson.read('sprites/villager.json')
       {
+        id: id,
         x: x,
         y: y,
         movement: { x: 0, y: 0 },
