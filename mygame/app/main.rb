@@ -17,7 +17,7 @@ def setup(args)
   state.menu.items = [
     {
       x: 5, y: 164, w: 15, h: 15, icon: :house,
-      building: { type: :house, cost: 30 }
+      building: { type: :house, cost: 30, collider: { x: 4, y: 0, w: 16, h: 9 } }
     },
     { x: 25, y: 164, w: 15, h: 15, icon: :wheat }
   ]
@@ -73,7 +73,7 @@ def handle_building(state)
   state.building_preview.merge!(r: 255, g: 0, b: 0) unless buildable
   return unless state.mouse[:click] && buildable
 
-  state.buildings << building_preview
+  state.buildings << building_preview.merge(building)
   state.money -= building[:cost]
 end
 
@@ -85,6 +85,13 @@ def render(gtk_outputs, state)
 
   state.buildings.each do |building|
     screen.primitives << building
+    next unless debug_mode?
+
+    screen.primitives << building[:collider].to_border(
+      x: building[:x] + building[:collider][:x],
+      y: building[:y] + building[:collider][:y],
+      r: 255, g: 0, b: 0
+    )
   end
 
   state.villagers.each do |villager|
