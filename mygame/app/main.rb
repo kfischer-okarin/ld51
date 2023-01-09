@@ -35,7 +35,7 @@ end
 def prepare_wheat_sprites(args)
   10.times do |i|
     oar_positions = generate_oar_positions
-    (0..5).each do |stage|
+    (1..5).each do |stage|
       target = args.outputs[:"wheat_stage#{stage}_#{i}"]
       target.width = 24
       target.height = 26
@@ -47,6 +47,11 @@ def prepare_wheat_sprites(args)
       end
     end
   end
+
+  target = args.outputs[:wheat_stage0]
+  target.width = 24
+  target.height = 26
+  target.sprites << Sprites.buildings[:field].merge(x: 0, y: 0)
 end
 
 def generate_oar_positions
@@ -171,7 +176,6 @@ def build_house(state, house)
 end
 
 def build_field(state, field)
-  rand_sprite_index = rand(10)
   state.buildings << {
     x: field[:x],
     y: field[:y],
@@ -181,7 +185,7 @@ def build_field(state, field)
     rand_sprite_index: rand(10),
     stage: 0,
     stage_ticks: 0,
-    path: :"wheat_stage0_#{rand_sprite_index}"
+    path: :wheat_stage0
   }.sprite!
 end
 
