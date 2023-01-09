@@ -15,7 +15,7 @@ def setup(args)
     { x: 5, y: 164, w: 15, h: 15, icon: :house },
     { x: 25, y: 164, w: 15, h: 15, icon: :wheat }
   ]
-  state.menu.hovered_item = nil
+  state.mode = :none
 end
 
 def process_inputs(inputs, state)
@@ -32,10 +32,15 @@ def process_inputs(inputs, state)
 end
 
 def handle_menu(mouse, menu)
-  menu.hovered_item = nil
+  clicked_item = nil
   menu.items.each do |item|
     Button.handle_mouse_input(mouse, item)
-    menu.hovered_item = item if item[:hovered]
+    clicked_item = item if item[:clicked]
+  end
+  return unless clicked_item
+
+  menu.items.each do |item|
+    item[:selected] = item == clicked_item
   end
 end
 
@@ -66,9 +71,10 @@ def render_ui(gtk_outputs, state)
   menu = state.menu
   menu.items.each do |item|
     rect = item.slice(:x, :y, :w, :h)
-    gtk_outputs.primitives << state.icons[:background].merge(PALETTE[:dark_brown]).merge(rect)
+    bg_color = item[:selected] ? PALETTE[:orange] : PALETTE[:dark_brown]
+    gtk_outputs.primitives << state.icons[:background].merge(bg_color).merge(rect)
     gtk_outputs.primitives << state.icons[item[:icon]].merge(rect)
-    gtk_outputs.primitives << state.icons[:border].merge(rect) if menu.hovered_item == item
+    gtk_outputs.primitives << state.icons[:border].merge(rect) if item[:hovered] && !item[:selected]
   end
 
   gtk_outputs.primitives << state.icons[:coin].merge(x: 278, y: 164)
@@ -84,9 +90,11 @@ PALETTE = {
   dark_grey: { r: 0x22, g: 0x20, b: 0x34 },
   dark_brown: { r: 0x45, g: 0x28, b: 0x3c },
   brown: { r: 0x66, g: 0x39, b: 0x31 },
+  orange: { r: 0xdf, g: 0x71, b: 0x26 },
   yellow: { r: 0xfb, g: 0xf2, b: 0x36 },
   bright_green: { r: 0x99, g: 0xe5, b: 0x50 },
   green: { r: 0x6a, g: 0xbe, b: 0x30 },
+  dark_green: { r: 0x4b, g: 0x69, b: 0x2f },
   blue_grey: { r: 0xcb, g: 0xdb, b: 0xfc }
 }
 
